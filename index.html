@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#161b22">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Financas">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Financas Familiar</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -1958,6 +1964,17 @@ function limparTudo() {
 function conf(msg,cb){g('confMsg').textContent=msg;g('confYes').onclick=function(){fechaOv('confOv');cb();};g('confOv').classList.add('open');}
 function fechaOv(id){g(id).classList.remove('open');}
 function toast(msg,tipo){var d=document.createElement('div');d.className='tst '+(tipo||'ok');d.innerHTML='<span>'+(tipo==='err'?'&#10005;':tipo==='inf'?'&#9432;':'&#10003;')+'</span> '+msg;g('tc').appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},3200);}
+
+// ═══ SERVICE WORKER (PWA) ═══
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
+      console.log('SW registrado:', reg.scope);
+    }).catch(function(err) {
+      console.log('SW erro:', err);
+    });
+  });
+}
 </script>
 </body>
 </html>
