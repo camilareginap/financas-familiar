@@ -304,6 +304,10 @@ tbody tr:hover td{background:var(--sur2);}
     <div class="sc pu" style="margin-bottom:0"><div class="sc-lbl">Pendentes / Vencidos</div><div class="sc-val pu" id="dPend">R$ 0,00</div><div class="sc-sub" id="dQPend">0 lancamentos</div></div>
     <div class="sc te" style="margin-bottom:0"><div class="sc-lbl">Saldo Previsto (mes)</div><div class="sc-val te" id="dPrev">R$ 0,00</div><div class="sc-sub">inclui recorrencias futuras</div></div>
   </div>
+  <div class="stats2" style="margin-bottom:14px">
+    <div class="sc bl" style="margin-bottom:0"><div class="sc-lbl">Saldo Operacional</div><div class="sc-val bl" id="dSalOp">R$ 0,00</div><div class="sc-sub">livre para gastar</div></div>
+    <div class="sc go" style="margin-bottom:0"><div class="sc-lbl">Patrimonio Total</div><div class="sc-val go" id="dPatrim">R$ 0,00</div><div class="sc-sub" id="dPatrimSub">operacional + investimentos</div></div>
+  </div>
   <div class="g2">
     <div class="pnl"><div class="ph"><h3>Gastos por Categoria</h3></div><div class="pb"><div class="cbox"><canvas id="chGastos"></canvas></div></div></div>
     <div class="pnl"><div class="ph"><h3>Evolucao Mensal</h3></div><div class="pb"><div class="cbox"><canvas id="chEvol"></canvas></div></div></div>
@@ -462,16 +466,23 @@ tbody tr:hover td{background:var(--sur2);}
 <!-- FLUXO -->
 <div id="pg-fluxo" class="page">
   <div class="pnl"><div class="ph"><h3>&#128302; Projecao de Fluxo de Caixa</h3>
-    <div style="display:flex;align-items:center;gap:7px"><span style="font-size:12px;color:var(--mut)">Horizonte:</span>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--mut)">Horizonte:</span>
       <select id="flxHorz" style="padding:5px 9px;border:1px solid var(--bor);border-radius:var(--r);background:var(--sur2);color:var(--tx);font-size:12px">
         <option value="3">3 meses</option><option value="6" selected>6 meses</option><option value="12">12 meses</option><option value="24">24 meses</option>
       </select>
+      <span style="font-size:12px;color:var(--mut)">Meta no grafico:</span>
+      <select id="flxMeta" style="padding:5px 9px;border:1px solid var(--bor);border-radius:var(--r);background:var(--sur2);color:var(--tx);font-size:12px">
+        <option value="">Nenhuma</option>
+      </select>
     </div>
   </div><div class="pb">
-    <div class="ilist" style="margin-bottom:12px"><div class="iitem"><div class="dot db"></div><span>Baseado nas recorrencias ativas. Saldo acumulado parte de todas as transacoes ja lancadas.</span></div></div>
+    <div class="ilist" style="margin-bottom:12px">
+      <div class="iitem"><div class="dot db"></div><span>Saldo acumulado projetado com base nas recorrencias ativas. Linha amarela tracejada = valor da meta selecionada — quando o saldo cruzar a linha, voce atingiu a meta.</span></div>
+    </div>
     <div class="cbox lg"><canvas id="chFluxo"></canvas></div>
   </div></div>
-  <div class="pnl"><div class="ph"><h3>Detalhamento por Mes</h3></div><div id="flxDetalhe"></div></div>
+  <div class="pnl"><div class="ph"><h3>Detalhamento por Mes</h3><span id="flxMetaAviso" style="font-size:12px;color:var(--go);font-weight:bold"></span></div><div id="flxDetalhe"></div></div>
 </div>
 
 <!-- CALENDARIO -->
@@ -952,6 +963,7 @@ window.onload = function() {
   // Init modo lancamento
   setModoLanc('simples');
   g('flxHorz').onchange = renderFluxo;
+  var flxMetaEl = g('flxMeta'); if(flxMetaEl) flxMetaEl.onchange = renderFluxo;
   g('sMes').onchange = renderTudo;
   g('sAno').onchange = renderTudo;
   g('rMod').onchange = toggleRec;
@@ -1096,7 +1108,12 @@ function initCharts() {
   CH.invT   = mk('chInvT','doughnut',{labels:[],datasets:[{data:[],backgroundColor:COR,borderWidth:0}]},{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:lg}});
   CH.pag    = mk('chPag','doughnut',{labels:[],datasets:[{data:[],backgroundColor:COR,borderWidth:0}]},{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:lg}});
   CH.relFlx = mk('chRelFlx','line',{labels:MS,datasets:[{label:'Entradas',data:new Array(12).fill(0),borderColor:'#3fb950',backgroundColor:'rgba(63,185,80,.08)',fill:true,tension:.4,pointRadius:3},{label:'Saidas',data:new Array(12).fill(0),borderColor:'#f85149',backgroundColor:'rgba(248,81,73,.08)',fill:true,tension:.4,pointRadius:3},{label:'Saldo',data:new Array(12).fill(0),borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.08)',fill:true,tension:.4,pointRadius:3}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:lg},scales:sc});
-  CH.fluxo  = mk('chFluxo','line',{labels:[],datasets:[{label:'Entradas Proj.',data:[],borderColor:'#3fb950',backgroundColor:'rgba(63,185,80,.08)',fill:true,tension:.4,pointRadius:3},{label:'Saidas Proj.',data:[],borderColor:'#f85149',backgroundColor:'rgba(248,81,73,.08)',fill:true,tension:.4,pointRadius:3},{label:'Saldo Acum.',data:[],borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.08)',fill:true,tension:.4,pointRadius:3}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:lg},scales:sc});
+  CH.fluxo  = mk('chFluxo','line',{labels:[],datasets:[
+    {label:'Entradas',data:[],borderColor:'#3fb950',backgroundColor:'rgba(63,185,80,.08)',fill:true,tension:.4,pointRadius:3},
+    {label:'Saidas',data:[],borderColor:'#f85149',backgroundColor:'rgba(248,81,73,.08)',fill:true,tension:.4,pointRadius:3},
+    {label:'Saldo Acumulado',data:[],borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.08)',fill:true,tension:.4,pointRadius:4,borderWidth:3},
+    {label:'Meta: (sem metas)',data:[],borderColor:'#d29922',backgroundColor:'transparent',fill:false,tension:0,pointRadius:5,borderWidth:2,borderDash:[6,3],pointStyle:'triangle'}
+  ]},{responsive:true,maintainAspectRatio:false,plugins:{legend:lg},scales:sc});
 }
 function updC(c, labels, ds) {
   if (!c) return;
@@ -1141,9 +1158,20 @@ function renderDash() {
   g('dInv').textContent = fmt(tI + tR);
   g('dQE').textContent = ents.length + ' lancamento(s)'; g('dQS').textContent = sais.length + ' lancamento(s)';
   g('dRnd').textContent = '+' + fmt(tR) + ' rendimento';
+  // Saldo Operacional = saldo do periodo (entradas - saidas ja pagas)
+  var salOp = DB.trans.reduce(function(a,t){
+    if(getStatus(t).label==='Pago') return a+(t.tipo==='entrada'?t.valor:-t.valor);
+    return a;
+  },0);
+  // Patrimonio Total = saldo operacional + investimentos
+  var patrim = salOp + tI + tR;
+  g('dSalOp').textContent = fmt(salOp);
+  g('dSalOp').className = 'sc-val ' + (salOp >= 0 ? 'bl' : 're');
+  g('dPatrim').textContent = fmt(patrim);
+  g('dPatrimSub').textContent = 'operacional ' + (tI>0?'+ '+fmt(tI+tR)+' invest.':'sem investimentos');
 
-  // Pendentes/vencidos
-  var pend = tf.filter(function(t) { var si = getStatus(t); return si.label === 'Pendente' || si.label === 'Vencido'; });
+  // Pendentes/vencidos - SEMPRE de TODOS os periodos (nao filtrado por mes)
+  var pend = DB.trans.filter(function(t) { var si = getStatus(t); return si.label === 'Pendente' || si.label === 'Vencido'; });
   var sPend = pend.reduce(function(a,t) { return a + t.valor; }, 0);
   g('dPend').textContent = fmt(sPend);
   g('dQPend').textContent = pend.length + ' lancamento(s)';
@@ -1470,11 +1498,36 @@ function renderFluxo() {
     p.sal=p.ent-p.sai;
   });
   var acum=base; projs.forEach(function(p){p.acum=acum+=p.sal;});
+  // Popular select de metas
+  var flxM = g('flxMeta');
+  if(flxM){
+    var curMeta = flxM.value;
+    flxM.innerHTML = '<option value="">Nenhuma</option>' +
+      DB.metas.map(function(m){return '<option value="'+m.id+'">'+m.nome+' ('+fmt(m.total)+')</option>';}).join('');
+    if(curMeta) flxM.value = curMeta;
+  }
+  // Linha de meta selecionada
+  var metaId = v('flxMeta');
+  var metaSel = DB.metas.find(function(m){return m.id===metaId;});
+  var metaLinha = projs.map(function(){return metaSel?metaSel.total:null;});
+  if(CH.fluxo && CH.fluxo.data.datasets[3]){
+    CH.fluxo.data.datasets[3].label = metaSel?('Meta: '+metaSel.nome):'';
+    CH.fluxo.data.datasets[3].data = metaSel?metaLinha:[];
+  }
   updC(CH.fluxo,
     projs.map(function(p){return MS[p.mes]+'/'+String(p.ano).slice(2);}),
     [projs.map(function(p){return p.ent;}),
      projs.map(function(p){return p.sai;}),
      projs.map(function(p){return p.acum;})]);
+  // Aviso: mes em que o saldo cruza a meta
+  var aviso = g('flxMetaAviso');
+  if(aviso){
+    if(metaSel){
+      var cruzou=projs.find(function(p){return p.acum>=metaSel.total;});
+      if(cruzou) aviso.textContent='&#127881; Voce atinge a meta "'+metaSel.nome+'" em '+MSF[cruzou.mes]+'/'+cruzou.ano+'!';
+      else aviso.textContent='&#128197; Meta "'+metaSel.nome+'" ainda fora do horizonte projetado.';
+    } else { aviso.textContent=''; }
+  }
   var isNow=function(p){return p.ano===now.getFullYear()&&p.mes===now.getMonth();};
   sh('flxDetalhe',projs.map(function(p){
     var cls=isNow(p)?'cf-row now':'cf-row';
@@ -1817,7 +1870,12 @@ function setGFiltro(btn, f) {
 }
 function renderGerenciar() {
   var el = g('gCards'); if (!el) return;
-  var tf = filtrar(DB.trans);
+  // Sempre inclui vencidos de qualquer periodo + lancamentos do periodo selecionado
+  var tfPeriodo = filtrar(DB.trans);
+  var tfVencidos = DB.trans.filter(function(t){
+    return getStatus(t).label === 'Vencido' && !tfPeriodo.some(function(x){return x.id===t.id;});
+  });
+  var tf = tfPeriodo.concat(tfVencidos);
   var fT=v('fTipo'); var fC=v('fCat'); var fM=v('fMem'); var fB=v('fBusca').toLowerCase();
   // contadores
   var tots = tf.length;
