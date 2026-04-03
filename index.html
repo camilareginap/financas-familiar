@@ -271,20 +271,45 @@ tbody tr:hover td{background:var(--sur2);}
 
 <!-- MAIN -->
 <div class="main">
-<div class="topbar">
+<div class="topbar" style="position:relative">
   <h2 id="pgTitle">Dashboard</h2>
   <div class="topbar-r">
     <div class="sync-lbl"><div class="sync-dot" id="syncDot"></div><span id="syncTxt">Offline</span></div>
-    <div class="per-box">&#128197;
-      <select id="sMes">
-        <option value="-1">Todos</option>
-        <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Marco</option>
-        <option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option>
-        <option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option>
-        <option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
-      </select>
-      <select id="sAno"></select>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div class="per-box" style="cursor:pointer;user-select:none" id="mesDropBtn" onclick="toggleMesDrop()">
+        &#128197; <span id="mesDropLbl">Mes atual</span> &#9660;
+      </div>
+      <div class="per-box">
+        <select id="sAno"></select>
+      </div>
     </div>
+    <!-- DROPDOWN MULTI-MES -->
+    <div id="mesDrop" style="display:none;position:absolute;top:52px;right:16px;z-index:300;background:var(--sur);border:1px solid var(--bor);border-radius:var(--r);padding:10px;box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:200px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:bold;color:var(--mut)">SELECIONAR MESES</span>
+        <button onclick="limparMeses()" style="font-size:11px;color:var(--bl);background:none;border:none;cursor:pointer">Limpar</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:7px;padding:5px 0;font-size:12px;cursor:pointer;border-bottom:1px solid var(--bor);margin-bottom:4px">
+        <input type="checkbox" id="ckTodos" onchange="toggleTodosMeses(this)" checked> Todos os meses
+      </label>
+      <div id="mesCks" style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="0" onchange="mesCkChange()"> Jan</label>
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="1" onchange="mesCkChange()"> Fev</label>
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="2" onchange="mesCkChange()"> Mar</label>
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="3" onchange="mesCkChange()"> Abr</label>
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="4" onchange="mesCkChange()"> Mai</label>
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="5" onchange="mesCkChange()"> Jun</label>
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="6" onchange="mesCkChange()"> Jul</label>
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="7" onchange="mesCkChange()"> Ago</label>
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="8" onchange="mesCkChange()"> Set</label>
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="9" onchange="mesCkChange()"> Out</label>
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="10" onchange="mesCkChange()"> Nov</label>
+        <label style="display:flex;align-items:center;gap:5px;padding:4px;font-size:12px;cursor:pointer"><input type="checkbox" class="mck" value="11" onchange="mesCkChange()"> Dez</label>
+      </div>
+      <button onclick="toggleMesDrop()" style="width:100%;margin-top:8px;padding:7px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:12px;font-weight:bold;cursor:pointer">Aplicar</button>
+    </div>
+    <!-- select oculto para compatibilidade -->
+    <select id="sMes" style="display:none"><option value="-1" selected>Todos</option></select>
     <button class="qbtn" id="btnQ">&#9889; Rapido [Q]</button>
   </div>
 </div>
@@ -300,9 +325,22 @@ tbody tr:hover td{background:var(--sur2);}
     <div class="sc bl"><div class="sc-lbl">Saldo</div><div class="sc-val bl" id="dSal">R$ 0,00</div><div class="sc-sub">entradas menos saidas</div></div>
     <div class="sc go"><div class="sc-lbl">Investimentos</div><div class="sc-val go" id="dInv">R$ 0,00</div><div class="sc-sub" id="dRnd">+R$ 0 rendimento</div></div>
   </div>
-  <div class="stats2">
-    <div class="sc pu" style="margin-bottom:0"><div class="sc-lbl">Pendentes / Vencidos</div><div class="sc-val pu" id="dPend">R$ 0,00</div><div class="sc-sub" id="dQPend">0 lancamentos</div></div>
-    <div class="sc te" style="margin-bottom:0"><div class="sc-lbl">Saldo Previsto (mes)</div><div class="sc-val te" id="dPrev">R$ 0,00</div><div class="sc-sub">inclui recorrencias futuras</div></div>
+  <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">
+    <div class="sc re" style="margin-bottom:0;cursor:pointer" onclick="irParaVencidos()" title="Ver vencidos em Lancamentos">
+      <div class="sc-lbl">&#9888; Vencidos (todos os meses)</div>
+      <div class="sc-val re" id="dVenc">R$ 0,00</div>
+      <div class="sc-sub" id="dQVenc">0 lancamentos - clique para ver</div>
+    </div>
+    <div class="sc pu" style="margin-bottom:0">
+      <div class="sc-lbl">&#9203; Pendentes (periodo)</div>
+      <div class="sc-val pu" id="dPend">R$ 0,00</div>
+      <div class="sc-sub" id="dQPend">0 lancamentos</div>
+    </div>
+    <div class="sc te" style="margin-bottom:0">
+      <div class="sc-lbl">Saldo Previsto (mes)</div>
+      <div class="sc-val te" id="dPrev">R$ 0,00</div>
+      <div class="sc-sub">inclui recorrencias futuras</div>
+    </div>
   </div>
   <div class="stats2" style="margin-bottom:14px">
     <div class="sc bl" style="margin-bottom:0"><div class="sc-lbl">Saldo Operacional</div><div class="sc-val bl" id="dSalOp">R$ 0,00</div><div class="sc-sub">livre para gastar</div></div>
@@ -530,6 +568,10 @@ tbody tr:hover td{background:var(--sur2);}
         <div class="fg"><label>Data Limite</label><input id="mData" type="date"></div>
       </div>
       <div class="fg"><label>Ja Guardado (R$)</label><input id="mAtual" type="number" min="0" step="0.01" value="0"></div>
+      <div class="fg"><label>Categoria Vinculada (opcional)</label>
+        <select id="mCat"><option value="">Nenhuma - atualizar manualmente</option></select>
+        <p style="font-size:11px;color:var(--mut);margin-top:4px">Se vinculada, lançamentos pagos dessa categoria somam automaticamente na meta.</p>
+      </div>
       <button class="btn btn-p btn-w" id="btnAddM">+ Criar Meta</button>
     </div></div>
     <div class="pnl"><div class="ph"><h3>Resumo</h3></div><div class="pb"><div class="ilist" id="metaRes"></div></div></div>
@@ -794,15 +836,59 @@ function diasMes(a, m) { return new Date(a, m + 1, 0).getDate(); }
 function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function fmt(n) { return 'R$ ' + Math.abs(n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 function fmtD(s) { if (!s) return ''; return new Date(s + 'T00:00:00').toLocaleDateString('pt-BR'); }
-function getFil() { return {mes: parseInt(v('sMes')), ano: parseInt(v('sAno'))}; }
+// Meses selecionados: array de numeros (0-11), vazio = todos
+var mesesSel = [];
+
+function getFil() { return {meses: mesesSel.slice(), ano: parseInt(v('sAno'))}; }
 function filtrar(arr) {
   var f = getFil();
   return arr.filter(function(t) {
     var d = new Date(t.data + 'T00:00:00');
     if (f.ano && d.getFullYear() !== f.ano) return false;
-    if (f.mes !== -1 && d.getMonth() !== f.mes) return false;
+    if (f.meses.length > 0 && f.meses.indexOf(d.getMonth()) === -1) return false;
     return true;
   });
+}
+function toggleMesDrop() {
+  var el = g('mesDrop');
+  if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function mesCkChange() {
+  var cks = document.querySelectorAll('.mck:checked');
+  mesesSel = Array.from(cks).map(function(c){ return parseInt(c.value); });
+  var ckTodos = g('ckTodos');
+  if(ckTodos) ckTodos.checked = mesesSel.length === 0;
+  atualizarMesLbl();
+  renderTudo();
+}
+function toggleTodosMeses(cb) {
+  document.querySelectorAll('.mck').forEach(function(c){ c.checked = false; });
+  mesesSel = [];
+  atualizarMesLbl();
+  renderTudo();
+}
+function limparMeses() {
+  document.querySelectorAll('.mck').forEach(function(c){ c.checked = false; });
+  var ckTodos = g('ckTodos'); if(ckTodos) ckTodos.checked = true;
+  mesesSel = [];
+  atualizarMesLbl();
+  renderTudo();
+}
+function atualizarMesLbl() {
+  var lbl = g('mesDropLbl'); if(!lbl) return;
+  if(mesesSel.length === 0) { lbl.textContent = 'Todos os meses'; return; }
+  if(mesesSel.length === 1) { lbl.textContent = MS[mesesSel[0]]; return; }
+  lbl.textContent = mesesSel.length + ' meses selecionados';
+}
+function irParaVencidos() {
+  irPara('lancamentos');
+  setTimeout(function(){
+    var tab = document.querySelector('.lab-tab[data-lab="lab-hist"]');
+    if(tab) switchLab(tab,'lab-hist');
+    setTimeout(function(){
+      var btn = g('gfVenc'); if(btn) setGFiltro(btn,'vencido');
+    },100);
+  },100);
 }
 
 // ═══ STATUS ═══
@@ -946,7 +1032,11 @@ window.onload = function() {
     if (y === now.getFullYear()) o.selected = true;
     sa.appendChild(o);
   }
-  g('sMes').value = now.getMonth();
+  // Iniciar com mes atual selecionado
+  mesesSel = [now.getMonth()];
+  var ckAtual = document.querySelector('.mck[value="'+now.getMonth()+'"]');
+  if(ckAtual){ ckAtual.checked = true; var ct=g('ckTodos');if(ct)ct.checked=false; }
+  atualizarMesLbl();
   var ym = now.getFullYear() + '-' + pad(now.getMonth() + 1);
   g('tData').value = hoje(); g('iData').value = hoje(); g('qData').value = hoje();
   g('rIniP').value = ym; g('rIniF').value = ym;
@@ -964,8 +1054,14 @@ window.onload = function() {
   setModoLanc('simples');
   g('flxHorz').onchange = renderFluxo;
   var flxMetaEl = g('flxMeta'); if(flxMetaEl) flxMetaEl.onchange = renderFluxo;
-  g('sMes').onchange = renderTudo;
   g('sAno').onchange = renderTudo;
+  // Fechar dropdown ao clicar fora
+  document.addEventListener('click', function(e){
+    var drop = g('mesDrop'); var btn = g('mesDropBtn');
+    if(drop && drop.style.display!=='none' && !drop.contains(e.target) && btn && !btn.contains(e.target)){
+      drop.style.display='none';
+    }
+  });
   g('rMod').onchange = toggleRec;
 
   // Botoes
@@ -1069,13 +1165,15 @@ function remTag(boxId, inputId, idx) {
 
 // ═══ SELECTS ═══
 function popularSelects() {
-  var catIds = ['tCat','rCat','fvCat','qCat','eCat','fCat'];
+  var catIds = ['tCat','rCat','fvCat','qCat','eCat','fCat','mCat'];
   var memIds = ['tMem','rMem','fvMem','qMem','eMem','fMem'];
   catIds.forEach(function(id) {
     var el = g(id); if (!el) return;
     var cur = el.value;
-    el.innerHTML = (id === 'fCat' ? '<option value="">Todas cats.</option>' : '') +
-      DB.cats.map(function(c) { return '<option>' + esc(c) + '</option>'; }).join('');
+    var prefix = '';
+    if(id === 'fCat') prefix = '<option value="">Todas cats.</option>';
+    else if(id === 'mCat') prefix = '<option value="">Nenhuma - atualizar manualmente</option>';
+    el.innerHTML = prefix + DB.cats.map(function(c) { return '<option>' + esc(c) + '</option>'; }).join('');
     if (cur) el.value = cur;
   });
   memIds.forEach(function(id) {
@@ -1158,21 +1256,28 @@ function renderDash() {
   g('dInv').textContent = fmt(tI + tR);
   g('dQE').textContent = ents.length + ' lancamento(s)'; g('dQS').textContent = sais.length + ' lancamento(s)';
   g('dRnd').textContent = '+' + fmt(tR) + ' rendimento';
-  // Saldo Operacional = saldo do periodo (entradas - saidas ja pagas)
+  // Saldo Operacional (Opcao A): soma so lancamentos com status PAGO, todos os periodos
+  // Reflete o dinheiro que realmente entrou e saiu da conta ate agora
   var salOp = DB.trans.reduce(function(a,t){
-    if(getStatus(t).label==='Pago') return a+(t.tipo==='entrada'?t.valor:-t.valor);
+    if(getStatus(t).label === 'Pago') return a + (t.tipo==='entrada' ? t.valor : -t.valor);
     return a;
-  },0);
-  // Patrimonio Total = saldo operacional + investimentos
+  }, 0);
+  // Patrimonio Total = saldo operacional + investimentos (com rendimento)
   var patrim = salOp + tI + tR;
   g('dSalOp').textContent = fmt(salOp);
   g('dSalOp').className = 'sc-val ' + (salOp >= 0 ? 'bl' : 're');
   g('dPatrim').textContent = fmt(patrim);
-  g('dPatrimSub').textContent = 'operacional ' + (tI>0?'+ '+fmt(tI+tR)+' invest.':'sem investimentos');
+  g('dPatrimSub').textContent = (tI > 0) ? 'operacional + ' + fmt(tI+tR) + ' em invest.' : 'sem investimentos registrados';
 
-  // Pendentes/vencidos - SEMPRE de TODOS os periodos (nao filtrado por mes)
-  var pend = DB.trans.filter(function(t) { var si = getStatus(t); return si.label === 'Pendente' || si.label === 'Vencido'; });
-  var sPend = pend.reduce(function(a,t) { return a + t.valor; }, 0);
+  // Vencidos: SEMPRE todos os periodos (nao filtrado)
+  var vencidos = DB.trans.filter(function(t){ return getStatus(t).label === 'Vencido'; });
+  var sVenc = vencidos.reduce(function(a,t){ return a+t.valor; }, 0);
+  g('dVenc').textContent = fmt(sVenc);
+  g('dQVenc').textContent = vencidos.length + ' lancamento(s) - clique para ver';
+  g('dVenc').style.color = vencidos.length > 0 ? 'var(--re)' : 'var(--gr)';
+  // Pendentes: respeita o periodo selecionado
+  var pend = tf.filter(function(t){ return getStatus(t).label === 'Pendente'; });
+  var sPend = pend.reduce(function(a,t){ return a+t.valor; }, 0);
   g('dPend').textContent = fmt(sPend);
   g('dQPend').textContent = pend.length + ' lancamento(s)';
 
@@ -1230,7 +1335,8 @@ function renderDash() {
   var mx = Object.entries(cats).sort(function(a,b) { return b[1]-a[1]; })[0];
   if (mx) ins.push({c:'dgo', m:'Maior gasto: ' + mx[0] + ' com ' + fmt(mx[1]) + '.'});
   if (sE > 0) ins.push({c:'db', m:'Taxa de poupanca: ' + ((sal/sE)*100).toFixed(1) + '%.'});
-  if (pend.length) ins.push({c:'dp', m:pend.length + ' lancamento(s) pendente(s) ou vencido(s). Total: ' + fmt(sPend) + '.'});
+  if (vencidos.length) ins.push({c:'dr', m:vencidos.length + ' lancamento(s) VENCIDO(S)! Total: ' + fmt(sVenc) + '. Clique em Vencidos para resolver.'});
+  else if (pend.length) ins.push({c:'dp', m:pend.length + ' lancamento(s) pendente(s) no periodo. Total: ' + fmt(sPend) + '.'});
   var ra = DB.recs.filter(function(r) { return !r.enc; }).length;
   if (ra) ins.push({c:'dte', m:ra + ' recorrencia(s) ativa(s). Veja o Fluxo de Caixa.'});
   if (!ins.length) ins.push({c:'db', m:'Adicione transacoes para ver insights.'});
@@ -1463,24 +1569,29 @@ function renderFavRap() {
 // ═══ FLUXO ═══
 function renderFluxo() {
   var horz=parseInt(v('flxHorz'))||6; var now=new Date();
-  // Base = saldo de transacoes com data anterior a hoje
+  // Base = saldo acumulado de transacoes PAGAS com data anterior ao inicio do horizonte
+  // Evita double-count: transacoes futuras serao somadas nos projs abaixo
   var hoje2=new Date(); hoje2.setHours(0,0,0,0);
+  var inicioHorz=new Date(now.getFullYear(),now.getMonth(),1);
   var base=DB.trans.reduce(function(a,t){
     var d=new Date(t.data+'T00:00:00');
-    return d<hoje2 ? a+(t.tipo==='entrada'?t.valor:-t.valor) : a;
+    // Inclui no base: transacoes pagas anteriores ao inicio do horizonte
+    if(d < inicioHorz && getStatus(t).label==='Pago')
+      return a+(t.tipo==='entrada'?t.valor:-t.valor);
+    return a;
   },0);
   var projs=[];
   for(var i=0;i<horz;i++){var d=new Date(now.getFullYear(),now.getMonth()+i,1);projs.push({ano:d.getFullYear(),mes:d.getMonth(),ent:0,sai:0});}
   projs.forEach(function(p){
     var ch=ymS(p.ano,p.mes);
-    // Somar transacoes ja existentes neste mes (geradas por rec ou manuais)
+    // Somar transacoes ja existentes neste mes (pagas e pendentes - para projecao realista)
     DB.trans.forEach(function(t){
       var d=new Date(t.data+'T00:00:00');
-      if(d.getFullYear()===p.ano&&d.getMonth()===p.mes){
-        t.tipo==='entrada'?p.ent+=t.valor:p.sai+=t.valor;
+      if(d.getFullYear()===p.ano && d.getMonth()===p.mes){
+        t.tipo==='entrada' ? p.ent+=t.valor : p.sai+=t.valor;
       }
     });
-    // Somar recorrencias que ainda nao foram lancadas (nao tem transacao gerada)
+    // Somar apenas recorrencias que NAO tem lancamento gerado (evita double-count)
     DB.recs.forEach(function(rec){
       if(rec.enc)return;
       if(ch<ymS(rec.anoIni,rec.mesIni))return;
@@ -1632,22 +1743,36 @@ function saveLims() {
 function addMeta() {
   var nome=v('mNome');var total=vn('mTotal');var data=v('mData');
   if(!nome||!total||!data){toast('Preencha todos os campos.','err');return;}
-  DB.metas.push({id:uid(),nome:nome,total:total,atual:vn('mAtual'),data:data});
+  DB.metas.push({id:uid(),nome:nome,total:total,atual:vn('mAtual'),data:data,catVinc:v('mCat')});
   salvar();g('mNome').value='';g('mTotal').value='';g('mAtual').value='0';
+  var mc=g('mCat');if(mc)mc.value='';
   renderMetas();toast('Meta criada!','ok');
 }
+function calcAtualMeta(m) {
+  // Se tem categoria vinculada, soma transacoes pagas dessa categoria
+  if (!m.catVinc) return m.atual;
+  return DB.trans.filter(function(t){
+    return t.cat === m.catVinc && t.tipo === 'saida' && getStatus(t).label === 'Pago';
+  }).reduce(function(a,t){ return a+t.valor; }, 0);
+}
 function renderMetas() {
+  // mCat ja e populado por popularSelects() - nao precisa repovoar aqui
   var lista=g('metaLista');var res=g('metaRes');if(!lista)return;
   lista.innerHTML=DB.metas.length?DB.metas.map(function(m){
-    var pct=Math.min((m.atual/m.total)*100,100);var cor=pct>=100?'#3fb950':pct>=70?'#58a6ff':'#d29922';
+    var atual = calcAtualMeta(m);
+    var pct=Math.min((atual/m.total)*100,100);var cor=pct>=100?'#3fb950':pct>=70?'#58a6ff':'#d29922';
     var dias=Math.ceil((new Date(m.data+' 00:00:00')-new Date())/864e5);
-    return '<div class="meta-card"><div class="meta-top"><div><div class="meta-name">'+esc(m.nome)+'</div><div class="meta-sub">Ate '+fmtD(m.data)+' - '+(dias>0?dias+' dias':'Vencida')+'</div></div>'
-      +'<div style="display:flex;gap:6px;align-items:center"><input type="number" value="'+m.atual+'" min="0" step="10" onchange="updMeta(\''+m.id+'\',this.value)" style="width:88px;text-align:right;padding:4px 7px;border:1px solid var(--bor);border-radius:var(--r);background:var(--sur2);color:var(--tx);font-size:12px">'
+    var catInfo = m.catVinc
+      ? '<span class="bdg bb">&#128279; '+esc(m.catVinc)+'</span> <span style="font-size:10px;color:var(--mut)">atualizado automaticamente</span>'
+      : '<input type="number" value="'+m.atual+'" min="0" step="10" onchange="updMeta(\''+m.id+'\',this.value)" style="width:88px;text-align:right;padding:4px 7px;border:1px solid var(--bor);border-radius:var(--r);background:var(--sur2);color:var(--tx);font-size:12px">';
+    return '<div class="meta-card"><div class="meta-top"><div><div class="meta-name">'+esc(m.nome)+'</div>'
+      +'<div class="meta-sub">Ate '+fmtD(m.data)+' - '+(dias>0?dias+' dias':'Vencida')+'</div></div>'
+      +'<div style="display:flex;gap:6px;align-items:center">'+catInfo
       +'<button class="btn btn-d" onclick="conf(\'Remover meta?\',function(){remMeta(\''+m.id+'\')})">&#10005;</button></div></div>'
       +'<div class="pr-track"><div class="pr-fill" style="width:'+pct+'%;background:'+cor+'"></div></div>'
-      +'<div class="meta-bot"><span>'+fmt(m.atual)+' guardado</span><span style="font-weight:bold;color:'+cor+'">'+pct.toFixed(0)+'%</span><span>Meta: '+fmt(m.total)+'</span></div></div>';
+      +'<div class="meta-bot"><span>'+fmt(atual)+' guardado</span><span style="font-weight:bold;color:'+cor+'">'+pct.toFixed(0)+'%</span><span>Meta: '+fmt(m.total)+'</span></div></div>';
   }).join(''):'<div class="empty"><div class="ei">&#127919;</div><p>Nenhuma meta criada</p></div>';
-  if(res){var tT=DB.metas.reduce(function(a,m){return a+m.total;},0);var tA=DB.metas.reduce(function(a,m){return a+m.atual;},0);var conc=DB.metas.filter(function(m){return m.atual>=m.total;}).length;res.innerHTML=[{c:'dgo',m:DB.metas.length+' meta(s)'},{c:'dg',m:'Guardado: '+fmt(tA)+' de '+fmt(tT)},{c:'db',m:conc+' concluida(s)'}].map(function(i){return'<div class="iitem"><div class="dot '+i.c+'"></div><span>'+i.m+'</span></div>';}).join('');}
+  if(res){var tT=DB.metas.reduce(function(a,m){return a+m.total;},0);var tA=DB.metas.reduce(function(a,m){return a+calcAtualMeta(m);},0);var conc=DB.metas.filter(function(m){return calcAtualMeta(m)>=m.total;}).length;res.innerHTML=[{c:'dgo',m:DB.metas.length+' meta(s)'},{c:'dg',m:'Guardado: '+fmt(tA)+' de '+fmt(tT)},{c:'db',m:conc+' concluida(s)'}].map(function(i){return'<div class="iitem"><div class="dot '+i.c+'"></div><span>'+i.m+'</span></div>';}).join('');}
 }
 function updMeta(id,val){var m=DB.metas.find(function(m){return m.id===id;});if(m){m.atual=parseFloat(val)||0;salvar();renderMetas();}}
 function remMeta(id){DB.metas=DB.metas.filter(function(m){return m.id!==id;});salvar();renderMetas();toast('Meta removida.','ok');}
